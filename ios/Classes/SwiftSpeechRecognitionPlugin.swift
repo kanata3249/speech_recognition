@@ -10,10 +10,8 @@ public class SwiftSpeechRecognitionPlugin: NSObject, FlutterPlugin, SFSpeechReco
 		registrar.addMethodCallDelegate(instance, channel: channel)
 	}
 
-	private let speechRecognizerFr = SFSpeechRecognizer(locale: Locale(identifier: "fr_FR"))!
-	private let speechRecognizerEn = SFSpeechRecognizer(locale: Locale(identifier: "en_US"))!
-	private let speechRecognizerRu = SFSpeechRecognizer(locale: Locale(identifier: "ru_RU"))!
-	private let speechRecognizerIt = SFSpeechRecognizer(locale: Locale(identifier: "it_IT"))!
+	private var lang: String = "en_US"
+	private var speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "en_US"))!
 
 	private var speechChannel: FlutterMethodChannel?
 
@@ -45,10 +43,7 @@ public class SwiftSpeechRecognitionPlugin: NSObject, FlutterPlugin, SFSpeechReco
 	}
 
 	private func activateRecognition(result: @escaping FlutterResult) {
-		speechRecognizerFr.delegate = self
-		speechRecognizerEn.delegate = self
-		speechRecognizerRu.delegate = self
-		speechRecognizerIt.delegate = self
+		speechRecognizer.delegate = self
 
 		SFSpeechRecognizer.requestAuthorization { authStatus in
 			OperationQueue.main.addOperation {
@@ -161,18 +156,12 @@ public class SwiftSpeechRecognitionPlugin: NSObject, FlutterPlugin, SFSpeechReco
 	}
 
 	private func getRecognizer(lang: String) -> Speech.SFSpeechRecognizer {
-		switch (lang) {
-		case "fr_FR":
-			return speechRecognizerFr
-		case "en_US":
-			return speechRecognizerEn
-		case "ru_RU":
-			return speechRecognizerRu
-		case "it_IT":
-			return speechRecognizerIt
-		default:
-			return speechRecognizerFr
+		if (lang != self.lang) {
+			self.lang = lang;
+			speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: lang))!
+			speechRecognizer.delegate = self
 		}
+		return speechRecognizer
 	}
 
 	public func speechRecognizer(_ speechRecognizer: SFSpeechRecognizer, availabilityDidChange available: Bool) {
