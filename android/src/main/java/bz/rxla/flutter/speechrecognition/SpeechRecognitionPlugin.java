@@ -220,13 +220,13 @@ public class SpeechRecognitionPlugin implements MethodCallHandler, RecognitionLi
 
 				if (bundle != null) {
 					if (bundle.containsKey(RecognizerIntent.EXTRA_SUPPORTED_LANGUAGES)) {
-						locales = bundle.getStringArrayList(RecognizerIntent.EXTRA_SUPPORTED_LANGUAGES));
+						locales = bundle.getStringArrayList(RecognizerIntent.EXTRA_SUPPORTED_LANGUAGES);
 					}
 				}
-				if (locales) {
+				if (locales != null) {
 					result.success(locales);
 				} else {
-					result.error('Can not get supported locales.');
+					result.error("Can not get supported locales.", null, null);
 				}
 			}
 		}, null, 1234, null, null);
