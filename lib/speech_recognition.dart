@@ -45,6 +45,16 @@ class SpeechRecognition {
 
 	Future stop() => _channel.invokeMethod("speech.stop");
 
+  Future<List<String>> supportedLocales() async {
+    List<dynamic> locales;
+    try {
+      locales = await _channel.invokeMethod("speech.supportedLocales");
+    } on PlatformException catch (e) {
+
+    }
+    return locales.map<String>((value) => value.toString()).toList();
+  }
+
 	Future _platformCallHandler(MethodCall call) async {
 		// print("_platformCallHandler call ${call.method} ${call.arguments}");
 
@@ -79,6 +89,10 @@ class SpeechRecognition {
 
 			case "speech.onPermissionDenied":
 				_canRecord = false;
+				break;
+
+			case "speech.onSupportedLocales":
+				recognitionCompleteHandler(call.arguments);
 				break;
 
 			default:

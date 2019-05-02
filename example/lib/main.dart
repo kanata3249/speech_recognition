@@ -35,6 +35,10 @@ class _MyAppState extends State<MyApp> {
     _speech.setRecognitionStartedHandler(onRecognitionStarted);
     _speech.setRecognitionResultHandler(onRecognitionResult);
     _speech.setRecognitionCompleteHandler(onRecognitionComplete);
+    _speech.supportedLocales().then((List<String> locales) {
+      print('Supported locales listed below');
+      locales.forEach((locale) => print(locale));
+    });
     _speech
         .activate()
         .then((res) => setState(() => _speechRecognitionAvailable = res));

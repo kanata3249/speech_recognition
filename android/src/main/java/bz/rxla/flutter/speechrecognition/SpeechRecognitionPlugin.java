@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.BroadcastReceiver;
 import android.os.Bundle;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
@@ -126,6 +127,10 @@ public class SpeechRecognitionPlugin implements MethodCallHandler, RecognitionLi
 				result.success(true);
 				break;
 
+			case "speech.supportedLocales":
+				getSupportedLocales(this.activity, result);
+			  break;
+
 			default:
 				result.notImplemented();
 			}
@@ -203,4 +208,27 @@ public class SpeechRecognitionPlugin implements MethodCallHandler, RecognitionLi
 		speechChannel.invokeMethod(isFinal ? "speech.onRecognitionComplete" : "speech.onSpeech", transcription);
 	}
 
+	private void getSupportedLocales(final Activity activity, final Result result) {
+		final Intent recognizerIntent = new Intent(RecognizerIntent.ACTION_GET_LANGUAGE_DETAILS);
+		recognizerIntent.setPackage("com.google.android.googlequicksearchbox");
+
+		activity.sendOrderedBroadcast(recognizerIntent, null, new BroadcastReceiver() {
+			@Override
+			public void onReceive(final Context context, final Intent intent) {
+				final Bundle bundle = getResultExtras(true);
+				ArrayList<String> locales = null;
+
+				if (bundle != null) {
+					if (bundle.containsKey(RecognizerIntent.EXTRA_SUPPORTED_LANGUAGES)) {
+						locales = bundle.getStringArrayList(RecognizerIntent.EXTRA_SUPPORTED_LANGUAGES));
+					}
+				}
+				if (locales) {
+					result.success(locales);
+				} else {
+					result.error('Can not get supported locales.');
+				}
+			}
+		}, null, 1234, null, null);
+	}
 }

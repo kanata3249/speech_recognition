@@ -37,6 +37,8 @@ public class SwiftSpeechRecognitionPlugin: NSObject, FlutterPlugin, SFSpeechReco
 			self.cancelRecognition(result: result)
 		case "speech.stop":
 			self.stopRecognition(result: result)
+		case "speech.supportedLocales":
+			self.supportedLocales(result: result)
 		default:
 			result(FlutterMethodNotImplemented)
 		}
@@ -162,6 +164,12 @@ public class SwiftSpeechRecognitionPlugin: NSObject, FlutterPlugin, SFSpeechReco
 			speechRecognizer.delegate = self
 		}
 		return speechRecognizer
+	}
+
+	private func supportedLocales(result: FlutterResult) {
+		let localeSet = SFSpeechRecognizer.supportedLocales()
+
+		result(localeSet.map({ $0.languageCode }))
 	}
 
 	public func speechRecognizer(_ speechRecognizer: SFSpeechRecognizer, availabilityDidChange available: Bool) {
