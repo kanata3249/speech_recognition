@@ -21,6 +21,8 @@ public class SwiftSpeechRecognitionPlugin: NSObject, FlutterPlugin, SFSpeechReco
 
 	private let audioEngine = AVAudioEngine()
 
+	private var timer: Timer?
+
 	init(channel:FlutterMethodChannel){
 		speechChannel = channel
 		super.init()
@@ -102,6 +104,16 @@ public class SwiftSpeechRecognitionPlugin: NSObject, FlutterPlugin, SFSpeechReco
 		result(false)
 	}
 
+	private func startAutoStopTimer() {
+		timer?.invalidate()
+		timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false, block: { (timer) in
+			if self.audioEngine.isRunning {
+				self.audioEngine.stop()
+				self.recognitionRequest?.endAudio()
+			}
+		})
+	}
+
 	private func start(lang: String) throws {
 
 		cancelRecognition(result: nil)
@@ -130,10 +142,13 @@ public class SwiftSpeechRecognitionPlugin: NSObject, FlutterPlugin, SFSpeechReco
 				self.speechChannel?.invokeMethod("speech.onSpeech", arguments: result.bestTranscription.formattedString)
 				isFinal = result.isFinal
 				if isFinal {
+					self.timer?.invalidate()
 					self.speechChannel!.invokeMethod(
 						"speech.onRecognitionComplete",
 						arguments: result.bestTranscription.formattedString
 					)
+				} else {
+					self.startAutoStopTimer()
 				}
 			}
 
