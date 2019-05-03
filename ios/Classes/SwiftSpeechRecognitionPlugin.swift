@@ -169,7 +169,15 @@ public class SwiftSpeechRecognitionPlugin: NSObject, FlutterPlugin, SFSpeechReco
 	private func supportedLocales(result: FlutterResult) {
 		let localeSet = SFSpeechRecognizer.supportedLocales()
 
-		result(localeSet.map({ $0.languageCode }))
+		result(
+			localeSet.map{
+				if ($0.languageCode != nil && $0.regionCode != nil) {
+					return "\($0.languageCode!)_\($0.regionCode!)"
+				} else {
+					return "<invalid>"
+				}
+			}.filter { $0 != "<invalid>" }
+		)
 	}
 
 	public func speechRecognizer(_ speechRecognizer: SFSpeechRecognizer, availabilityDidChange available: Bool) {
